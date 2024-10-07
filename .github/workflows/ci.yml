@@ -5,6 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   build:
     name: Build
@@ -27,17 +28,60 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           printf '{"version": "%s" }' "$version" > public/version.json
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build
         run: |
-          npm ci && npm run build
+          npm run build
           cp dist/index.html dist/404.html
 
       - name: Update pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/
-  deploy:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
     needs: build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests with coverage
+        run: npm run test:coverage
+
+      - name: Check coverage
+        run: |
+          coverage_pct=$(grep -o '"pct":[0-9.]*' coverage/coverage-summary.json | head -n 1 | cut -d ':' -f 2)
+          if (( $(echo "$coverage_pct < 80" | bc -l) )); then
+            echo "Test coverage below 80%! Failing the build."
+            exit 1
+          fi
+
+      - name: Upload test coverage
+        run: |
+          curl https://img.shields.io/badge/Coverage-$coverage_pct%25-green -o coverageBadge.svg
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add coverageBadge.svg
+          git commit -m "Update coverage badge"
+          git push
+
+  deploy:
+    needs: [build, test]
     permissions:
       pages: write
       id-token: write
