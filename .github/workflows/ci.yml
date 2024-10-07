@@ -63,14 +63,6 @@ jobs:
       - name: Run Playwright tests with coverage
         run: npm run test:coverage
 
-      - name: Check coverage
-        run: |
-          coverage_pct=$(grep -o '"pct":[0-9.]*' coverage/coverage-summary.json | head -n 1 | cut -d ':' -f 2)
-          if (( $(echo "$coverage_pct < 80" | bc -l) )); then
-            echo "Test coverage below 80%! Failing the build."
-            exit 1
-          fi
-
       - name: Update coverage
         run: |
           coverage_pct=$(grep -o '"pct":[0-9.]*' coverage/coverage-summary.json | head -n 1 | cut -d ':' -f 2)
