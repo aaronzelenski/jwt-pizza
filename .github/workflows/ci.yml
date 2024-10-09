@@ -45,9 +45,13 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -71,8 +75,12 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "generated"
-          git push
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "generated"
+            git push
+          else
+            echo "No changes to commit"
+          fi
 
   deploy:
     needs: [build, test]
