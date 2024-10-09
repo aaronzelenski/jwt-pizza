@@ -1,6 +1,7 @@
 import { test, expect } from 'playwright-test-coverage';
 
 test('purchase with login', async ({ page }) => {
+  // Mock menu
   await page.route('*/**/api/order/menu', async (route) => {
     const menuRes = [
       { id: 1, title: 'Veggie', image: 'pizza1.png', price: 0.0038, description: 'A garden of delight' },
@@ -10,6 +11,7 @@ test('purchase with login', async ({ page }) => {
     await route.fulfill({ json: menuRes });
   });
 
+  // Mock franchise
   await page.route('*/**/api/franchise', async (route) => {
     const franchiseRes = [
       {
@@ -28,6 +30,7 @@ test('purchase with login', async ({ page }) => {
     await route.fulfill({ json: franchiseRes });
   });
 
+  // Mock login
   await page.route('*/**/api/auth', async (route) => {
     const loginReq = { email: 'd@jwt.com', password: 'a' };
     const loginRes = { user: { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] }, token: 'abcdef' };
@@ -36,6 +39,7 @@ test('purchase with login', async ({ page }) => {
     await route.fulfill({ json: loginRes });
   });
 
+  // Mock order
   await page.route('*/**/api/order', async (route) => {
     const orderReq = {
       items: [
