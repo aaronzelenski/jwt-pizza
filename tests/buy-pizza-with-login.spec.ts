@@ -95,4 +95,7 @@ test('purchase with login', async ({ page }) => {
 
   // Check balance
   await expect(page.getByText('0.008')).toBeVisible();
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await expect(page.getByText('invalid', { exact: true })).toBeVisible();
+  await expect(page.getByText('{ "error": "invalid JWT.')).toBeVisible();
 });

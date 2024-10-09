@@ -15,6 +15,9 @@ test('Register a new user and logout', async ({ page }) => {
 
       expect(requestPayload).toMatchObject(expectedRegisterReq);
       await route.fulfill({ json: mockRegisterRes });
+    } else {
+      const logoutRes = { user: null, token: null };
+      await route.fulfill({ json: logoutRes });
     }
   });
 
@@ -30,4 +33,5 @@ test('Register a new user and logout', async ({ page }) => {
 
   await expect(page.getByRole('link', { name: 'JA' })).toBeVisible();
   await page.getByRole('link', { name: 'Logout' }).click();
+  await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
 });
