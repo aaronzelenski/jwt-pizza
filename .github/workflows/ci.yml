@@ -10,11 +10,15 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -35,6 +39,18 @@ jobs:
         run: |
           npm run build
           cp dist/index.html dist/404.html
+
+      - name: Commit updated version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add public/version.json
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Incremented version number"
+            git push
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Update pages artifact
         uses: actions/upload-pages-artifact@v3
