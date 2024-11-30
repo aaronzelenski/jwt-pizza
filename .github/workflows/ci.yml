@@ -44,6 +44,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git pull origin main
           git add public/version.json
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Incremented version number"
@@ -90,6 +91,7 @@ jobs:
           curl https://img.shields.io/badge/Coverage-$coverage_pct%25-$color -o coverageBadge.svg
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git pull origin main
           git add .
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "generated"
