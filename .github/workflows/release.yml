@@ -52,4 +52,4 @@ jobs:
           body: |
             ## 🚀 Description
 
-            ${{ github.event.inputs.description }}
+            ${{ github.event.inputs.description }} 
