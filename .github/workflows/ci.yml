@@ -142,14 +142,23 @@ jobs:
           while [ "$(aws cloudfront get-distribution --id ${{ secrets.DISTRIBUTION_ID }} --query 'Distribution.Status' --output text)" != "Deployed" ]; do echo "Distribution is still updating..."; sleep 5; done
           aws cloudfront create-invalidation --distribution-id ${{ secrets.DISTRIBUTION_ID }} --paths "/*"
       
-      - name: Create GitHub release for staging
+  release:
+    name: Release
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
         uses: ncipollo/release-action@v1
+        env:
+          version: ${{needs.build.outputs.version}}
         with:
-          tag: staging-version-${{ env.version }}
-          name: Staging ${{ env.version }}
-          allowUpdates: true
-          generateReleaseNotes: true
+          tag: version-${{ env.version }}
+          name: Version ${{ env.version }}
           body: |
-            ## 🚀 Staging Release
-            Deployed version ${{ env.version }} to staging.
-            URL: https://stage-pizza.cs329aaron.com
+            ## 🚀 Changes
+
+            ${{ github.event.head_commit.message }}
+
+            **commit**: ${{ github.sha }}
